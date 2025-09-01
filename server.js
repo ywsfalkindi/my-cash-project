@@ -150,9 +150,12 @@ app.post('/submit-giveaway', async (req, res) => {
             },
         });
 
-        req.session.points = 0;
+        const pointsUsed = points; // نحفظ عدد النقاط المستخدمة لنعرضها في الرسالة
+        req.session.points = 0; // <-- نصفر رصيد نقاط المستخدم بعد المشاركة
+    // =======================================
 
-        res.json({ success: true, message: 'تم تسجيل مشاركتك في السحب بنجاح! بالتوفيق.' });
+    // نرسل رسالة النجاح الآن
+    res.json({ success: true, message: `تم تسجيل مشاركتك بـ ${pointsUsed} نقطة بنجاح! بالتوفيق.` });
     } catch (error) {
         console.error('Error writing to Google Sheets', error);
         res.status(500).json({ success: false, message: 'حدث خطأ ما. يرجى المحاولة مرة أخرى.' });
@@ -175,4 +178,5 @@ app.listen(port, () => {
     console.log(`المشروع يعمل الآن على الرابط http://localhost:${port}`);
 
 });
+
 
