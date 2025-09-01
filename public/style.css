@@ -206,3 +206,81 @@ button:active, .link-btn:active, .main-btn:active, a:active {
     border: 1px solid var(--border-color);
     flex-shrink: 0; /* Prevents the circle from shrinking */
 }
+
+/* --- [ قسم التجاوب مع جميع الأجهزة ] --- */
+/* Media Query للأجهزة اللوحية والهواتف (عرض الشاشة 768px أو أقل) */
+@media (max-width: 768px) {
+
+    body {
+        /* تقليل الـ padding لترك مساحة أكبر للمحتوى */
+        padding: 15px;
+    }
+
+    .container {
+        /* تقليل الهوامش الداخلية للحاوية الرئيسية */
+        padding: 25px;
+    }
+
+    /* تقليل حجم الخطوط لتناسب الشاشات الصغيرة */
+    h1 {
+        font-size: 2em;
+    }
+
+    h2 {
+        font-size: 1.5em;
+        /* السماح للنص بالانقسام إلى سطر جديد إذا كان طويلاً */
+        flex-wrap: wrap; 
+    }
+
+    p {
+        font-size: 1em;
+    }
+
+    /* جعل الأزرار تأخذ عرضًا كاملاً وتترتب فوق بعضها */
+    .links-section .link-btn {
+        display: block; /* أو flex وعرض 100% */
+        width: 100%;
+        box-sizing: border-box; /* لضمان أن الـ padding لا يزيد العرض */
+        margin: 10px 0;
+    }
+    
+    /* تنظيم قسم إدخال الكود */
+    .code-section {
+        display: flex;
+        flex-direction: column; /* جعل العناصر تترتب عمودياً */
+        align-items: center; /* توسيط العناصر */
+        gap: 10px; /* إضافة مسافة بين الحقل والزر */
+    }
+
+    input[type="text"] {
+        width: 100%; /* جعل حقل الإدخال يأخذ العرض الكامل */
+        box-sizing: border-box;
+        text-align: center; /* توسيط النص داخل الحقل */
+    }
+
+    #verifyBtn {
+        width: 100%; /* جعل الزر يأخذ العرض الكامل */
+        margin: 0;
+    }
+
+    /* تقليل المسافات العمودية بين الأقسام */
+    div[class$="-section"] {
+        margin-top: 25px;
+        padding-top: 20px;
+    }
+}
+
+/* Media Query إضافية للهواتف الصغيرة جدًا (عرض الشاشة 400px أو أقل) */
+@media (max-width: 400px) {
+    .container {
+        padding: 20px 15px; /* تقليل الهوامش أكثر */
+    }
+
+    h1 {
+        font-size: 1.8em;
+    }
+
+    h2 {
+        font-size: 1.3em;
+    }
+}

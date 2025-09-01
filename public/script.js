@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
         verifyBtn.addEventListener('click', async () => {
             const code = codeInput.value.trim();
             if (!code) {
-                messageDiv.textContent = 'الرجاء إدخال الكود أولاً.';
+                messageDiv.textContent = 'الرجاء إدخال الكود أولاً';
                 messageDiv.className = 'error';
                 return;
             }
@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // تم حذف المتغير points الذي كان يعتمد على حقل محذوف
             // تم تعديل الشرط ليعتمد على اسم المستخدم فقط
             if (!username) {
-                messageDiv.textContent = 'الرجاء إدخال يوزر انستغرام.';
+                messageDiv.textContent = 'الرجاء إدخال يوزر انستغرام';
                 messageDiv.className = 'error';
                 return;
             }
