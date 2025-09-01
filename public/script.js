@@ -1,8 +1,9 @@
+// script.js
+
 document.addEventListener('DOMContentLoaded', () => {
     // التحقق إذا كنا في الصفحة الرئيسية
     const verifyBtn = document.getElementById('verifyBtn');
     if (verifyBtn) {
-        let points = 0;
         const pointsDisplay = document.getElementById('points');
         const codeInput = document.getElementById('codeInput');
         const messageDiv = document.getElementById('message');
@@ -30,7 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await response.json();
 
             if (result.success) {
-                // نحدث عرض النقاط بناءً على الرقم القادم من الخادم
                 pointsDisplay.textContent = result.newPoints;
                 messageDiv.textContent = result.message;
                 messageDiv.className = 'success';
@@ -57,10 +57,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         submitBtn.addEventListener('click', async () => {
             const username = usernameInput.value.trim();
-            const points = pointsInput.value.trim();
-
-            if (!username || !points) {
-                messageDiv.textContent = 'الرجاء ملء جميع الحقول.';
+            
+            // --- [تم الإصلاح] ---
+            // تم حذف المتغير points الذي كان يعتمد على حقل محذوف
+            // تم تعديل الشرط ليعتمد على اسم المستخدم فقط
+            if (!username) {
+                messageDiv.textContent = 'الرجاء إدخال يوزر انستغرام.';
                 messageDiv.className = 'error';
                 return;
             }
@@ -68,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch('/submit-giveaway', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: username }) // لا نرسل النقاط من هنا
+                body: JSON.stringify({ username: username })
             });
 
             const result = await response.json();
@@ -77,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 messageDiv.textContent = result.message;
                 messageDiv.className = 'success';
                 usernameInput.value = '';
-                pointsInput.value = '';
+                // تم حذف السطر الذي كان يحاول تفريغ حقل النقاط المحذوف
                 currentPointsDisplay.textContent = 0;
             } else {
                 messageDiv.textContent = result.message;
