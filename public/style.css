@@ -11,6 +11,9 @@
     --error-color: #e74c3c;
     --container-bg: rgba(255, 255, 255, 0.1);
     --border-color: rgba(255, 255, 255, 0.2);
+    /* [جديد] لون للأزرار المعطلة */
+    --disabled-color-1: #6c757d;
+    --disabled-color-2: #495057;
 }
 
 /* --- تصميم الجسم والخلفية المتحركة --- */
@@ -132,6 +135,20 @@ button:active, .link-btn:active, .main-btn:active, a:active {
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
+/* [جديد] تصميم الزر المعطل */
+.link-btn.disabled {
+    background-image: linear-gradient(45deg, var(--disabled-color-1) 0%, var(--disabled-color-2) 100%);
+    cursor: not-allowed;
+    transform: translateY(0); /* إلغاء أي تأثير حركة */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.link-btn.disabled:hover {
+    transform: translateY(0);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+
 /* --- تخصيص ألوان أزرار مختلفة --- */
 .link-btn {
     background-image: linear-gradient(45deg, #02aab0 0%, #00cdac 100%);
@@ -150,8 +167,6 @@ button:active, .link-btn:active, .main-btn:active, a:active {
     font-weight: bold;
     font-size: 1.1em;
 }
-/* ملاحظة: تم حذف keyframes هنا لتجنب مشاكل العرض المتكرر، 
-   سيتم التحكم في الظهور عبر script.js إذا احتجنا لذلك. */
 
 .success {
     color: #fff;
@@ -208,27 +223,22 @@ button:active, .link-btn:active, .main-btn:active, a:active {
 }
 
 /* --- [ قسم التجاوب مع جميع الأجهزة ] --- */
-/* Media Query للأجهزة اللوحية والهواتف (عرض الشاشة 768px أو أقل) */
 @media (max-width: 768px) {
 
     body {
-        /* تقليل الـ padding لترك مساحة أكبر للمحتوى */
         padding: 15px;
     }
 
     .container {
-        /* تقليل الهوامش الداخلية للحاوية الرئيسية */
         padding: 25px;
     }
 
-    /* تقليل حجم الخطوط لتناسب الشاشات الصغيرة */
     h1 {
         font-size: 2em;
     }
 
     h2 {
         font-size: 1.5em;
-        /* السماح للنص بالانقسام إلى سطر جديد إذا كان طويلاً */
         flex-wrap: wrap; 
     }
 
@@ -236,44 +246,40 @@ button:active, .link-btn:active, .main-btn:active, a:active {
         font-size: 1em;
     }
 
-    /* جعل الأزرار تأخذ عرضًا كاملاً وتترتب فوق بعضها */
     .links-section .link-btn {
-        display: block; /* أو flex وعرض 100% */
+        display: block;
         width: 100%;
-        box-sizing: border-box; /* لضمان أن الـ padding لا يزيد العرض */
+        box-sizing: border-box;
         margin: 10px 0;
     }
     
-    /* تنظيم قسم إدخال الكود */
     .code-section {
         display: flex;
-        flex-direction: column; /* جعل العناصر تترتب عمودياً */
-        align-items: center; /* توسيط العناصر */
-        gap: 10px; /* إضافة مسافة بين الحقل والزر */
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
     }
 
     input[type="text"] {
-        width: 100%; /* جعل حقل الإدخال يأخذ العرض الكامل */
+        width: 100%;
         box-sizing: border-box;
-        text-align: center; /* توسيط النص داخل الحقل */
+        text-align: center;
     }
 
     #verifyBtn {
-        width: 100%; /* جعل الزر يأخذ العرض الكامل */
+        width: 100%;
         margin: 0;
     }
 
-    /* تقليل المسافات العمودية بين الأقسام */
     div[class$="-section"] {
         margin-top: 25px;
         padding-top: 20px;
     }
 }
 
-/* Media Query إضافية للهواتف الصغيرة جدًا (عرض الشاشة 400px أو أقل) */
 @media (max-width: 400px) {
     .container {
-        padding: 20px 15px; /* تقليل الهوامش أكثر */
+        padding: 20px 15px;
     }
 
     h1 {

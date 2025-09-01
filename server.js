@@ -3,6 +3,7 @@
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
+const fs = require('fs').promises;
 const { google } = require('googleapis');
 const session = require('express-session');
 const rateLimit = require('express-rate-limit');
@@ -12,15 +13,21 @@ const { open } = require('sqlite');
 const app = express();
 const port = 3000;
 
+// --- تعريف الروابط المختصرة ---
+const shortenedLinks = {
+    '1': 'https://best-cash.net/AUTH',
+    '2': 'https://short-jambo.ink/TnTZrBI',
+    '3': 'https://best-cash.net/Ve4Jag'
+};
+const LINK_COOLDOWN = 24 * 60 * 60 * 1000; // 24 ساعة
+
 // --- إعداد قاعدة البيانات ---
 let db;
-// دالة لإنشاء وتهيئة قاعدة البيانات
 const setupDatabase = async () => {
     db = await open({
         filename: './database.sqlite',
         driver: sqlite3.Database
     });
-    // إنشاء جدول الأكواد إذا لم يكن موجودًا
     await db.exec(`
         CREATE TABLE IF NOT EXISTS codes (
             code TEXT PRIMARY KEY,
@@ -31,65 +38,96 @@ const setupDatabase = async () => {
     console.log('قاعدة البيانات جاهزة للعمل.');
 };
 
-// --- منطقة الإعدادات الأمنية ---
+// --- الإعدادات العامة و Middleware ---
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 100,
     message: 'لقد قمت بالعديد من الطلبات، يرجى المحاولة مرة أخرى بعد 15 دقيقة.',
 });
-
 app.use(limiter);
 app.set('trust proxy', 1);
 
 app.use(session({
-    secret: process.env.SESSION_SECRET,
+    secret: process.env.SESSION_SECRET || 'a-very-secret-key-for-development',
     resave: false,
-    saveUninitialized: false, // تم التغيير إلى false لتحسين الأداء
+    saveUninitialized: true,
     proxy: true,
     cookie: {
-        secure: process.env.NODE_ENV === 'production', // يعمل فقط على HTTPS في بيئة الإنتاج
-        sameSite: 'lax' // أكثر أمانًا
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax'
     }
 }));
 
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-// [تم الإصلاح] تم تصحيح مسار الملفات الثابتة ليخدم من المجلد الرئيسي
-app.use(express.static(path.join(__dirname, 'public')));
-
-// ===--- منطقة منطق الأكواد والتخزين الدائم (باستخدام قاعدة البيانات) ---===
-
-app.get('/get-session-data', (req, res) => {
-    if (!req.session.points) {
+// تهيئة متغيرات الجلسة
+app.use((req, res, next) => {
+    if (req.session.points === undefined) {
         req.session.points = 0;
     }
-    res.json({ points: req.session.points });
+    if (!req.session.linkCooldowns) {
+        req.session.linkCooldowns = {};
+    }
+    next();
 });
 
-app.get('/authorize', (req, res) => {
+// **الخطوة الأهم**: تحديد مجلد "public" لخدمة الملفات (CSS, JS, images, etc.)
+app.use(express.static(path.join(__dirname, 'public')));
+
+
+// ===--- تعريف المسارات الديناميكية (API Routes) ---===
+
+app.get('/go/:linkId', (req, res) => {
+    const { linkId } = req.params;
+    const linkUrl = shortenedLinks[linkId];
+    if (!linkUrl) {
+        return res.status(404).send('الرابط غير موجود.');
+    }
+    const now = Date.now();
+    const lastUsed = req.session.linkCooldowns[linkId];
+    if (lastUsed && (now - lastUsed < LINK_COOLDOWN)) {
+        return res.redirect('/?error=link_on_cooldown');
+    }
+    req.session.linkCooldowns[linkId] = now;
     req.session.can_see_code = true;
-    res.redirect('/generate-code');
+    res.redirect(linkUrl);
+});
+
+app.get('/get-link-status', (req, res) => {
+    const statuses = {};
+    const now = Date.now();
+    for (const linkId in shortenedLinks) {
+        const lastUsed = req.session.linkCooldowns[linkId];
+        let disabled = false;
+        let timeLeft = 0;
+        if (lastUsed && (now - lastUsed < LINK_COOLDOWN)) {
+            disabled = true;
+            timeLeft = LINK_COOLDOWN - (now - lastUsed);
+        }
+        statuses[linkId] = { disabled, timeLeft };
+    }
+    res.json(statuses);
+});
+
+app.get('/get-session-data', (req, res) => {
+    res.json({ points: req.session.points });
 });
 
 app.get('/generate-code', async (req, res) => {
     if (req.session.can_see_code === true) {
         req.session.can_see_code = false;
-
         const newCode = Math.floor(10000 + Math.random() * 90000).toString();
-        const expires = Date.now() + (5 * 60 * 1000); // 5 دقائق صلاحية
-
+        const expires = Date.now() + (5 * 60 * 1000);
         try {
-            // إضافة الكود الجديد إلى قاعدة البيانات
             await db.run('INSERT INTO codes (code, used, expires) VALUES (?, 0, ?)', [newCode, expires]);
+            const codePageTemplate = await fs.readFile(path.join(__dirname, 'public', 'code.html'), 'utf8');
+            const finalHtml = codePageTemplate.replace('{{CODE_PLACEHOLDER}}', newCode);
+            res.send(finalHtml);
         } catch (error) {
-            console.error('خطأ في إدراج الكود في قاعدة البيانات:', error);
+            console.error('خطأ في مسار /generate-code:', error);
             return res.status(500).send('حدث خطأ أثناء إنشاء الكود.');
         }
-
-        res.send(`
-            <!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>لقد حصلت على كود!</title><style>body { font-family: 'Cairo', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; text-align: center; } .container { background: white; padding: 50px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); } h1 { color: #2c3e50; } .code { font-size: 3em; font-weight: bold; color: #27ae60; background: #ecf0f1; padding: 10px 20px; border-radius: 10px; letter-spacing: 5px; margin: 20px 0; } p { color: #7f8c8d; } a { color: #3498db; text-decoration: none; }</style></head><body><div class="container"><h1>🎉 تهانينا! 🎉</h1><p>لقد نجحت في تخطي الرابط. هذا هو الكود الخاص بك:</p><div class="code">${newCode}</div><p>انسخ هذا الكود، ثم <a href="/">ارجع إلى الصفحة الرئيسية</a> والصقه هناك لتربح نقطتك.</p></div></body></html>
-        `);
     } else {
         res.redirect('/');
     }
@@ -98,19 +136,10 @@ app.get('/generate-code', async (req, res) => {
 app.post('/verify-code', async (req, res) => {
     const { code } = req.body;
     const currentTime = Date.now();
-    
-    // البحث عن الكود في قاعدة البيانات
     const foundCode = await db.get('SELECT * FROM codes WHERE code = ? AND used = 0 AND expires > ?', [code, currentTime]);
-    
     if (foundCode) {
-        // تحديث حالة الكود إلى "مستخدم"
         await db.run('UPDATE codes SET used = 1 WHERE code = ?', [code]);
-
-        if (!req.session.points) {
-            req.session.points = 0;
-        }
         req.session.points++;
-
         res.json({ success: true, message: 'كود صحيح! لقد ربحت نقطة.', newPoints: req.session.points });
     } else {
         res.json({ success: false, message: 'الكود غير صحيح أو انتهت صلاحيته.' });
@@ -120,47 +149,35 @@ app.post('/verify-code', async (req, res) => {
 app.post('/submit-giveaway', async (req, res) => {
     const { username } = req.body;
     const points = req.session.points || 0;
-
     if (points <= 0) {
         return res.json({ success: false, message: 'ليس لديك نقاط كافية للمشاركة في السحب.' });
     }
-    
-    // [تحسين] التحقق من صحة تنسيق اسم المستخدم
     if (!username || !/^[a-zA-Z0-9._]{1,30}$/.test(username.replace('@', ''))) {
         return res.json({ success: false, message: 'الرجاء إدخال اسم مستخدم انستغرام صحيح.' });
     }
-
-    // [إصلاح] الحماية من ثغرة Formula Injection
     let safeUsername = username;
     if (['=', '+', '-', '@'].includes(username.charAt(0))) {
         safeUsername = "'" + username;
     }
-
     try {
         const auth = new google.auth.GoogleAuth({
             keyFile: 'credentials.json',
             scopes: 'https://www.googleapis.com/auth/spreadsheets',
         });
-
         const client = await auth.getClient();
         const googleSheets = google.sheets({ version: 'v4', auth: client });
         const spreadsheetId = '1n5F2TQGQQ-LWckUV7EMnE9QD-VxeJel72CS2bCsB2Zw';
-
         await googleSheets.spreadsheets.values.append({
             auth,
             spreadsheetId,
             range: 'Sheet1!A:C',
             valueInputOption: 'USER_ENTERED',
             resource: {
-                values: [
-                    [safeUsername, points, new Date().toLocaleString()]
-                ],
+                values: [[safeUsername, points, new Date().toLocaleString()]],
             },
         });
-
         const pointsUsed = points;
         req.session.points = 0;
-
         res.json({ success: true, message: `تم تسجيل مشاركتك بـ ${pointsUsed} نقطة بنجاح! بالتوفيق.` });
     } catch (error) {
         console.error('Error writing to Google Sheets', error);
@@ -168,6 +185,8 @@ app.post('/submit-giveaway', async (req, res) => {
     }
 });
 
+
+// ===--- معالجة الصفحات الرئيسية (HTML Routes) ---===
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
@@ -176,7 +195,8 @@ app.get('/giveaway', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'giveaway.html'));
 });
 
-// دالة التنظيف التلقائي للأكواد القديمة
+
+// --- دالة التنظيف وتشغيل الخادم ---
 const startCleanupInterval = () => {
     setInterval(async () => {
         const now = Date.now();
@@ -188,10 +208,9 @@ const startCleanupInterval = () => {
         } catch (error) {
             console.error('خطأ أثناء تنظيف الأكواد القديمة:', error);
         }
-    }, 60 * 60 * 1000); // تعمل كل ساعة
+    }, 60 * 60 * 1000);
 };
 
-// تشغيل الخادم وتهيئة قاعدة البيانات
 app.listen(port, async () => {
     await setupDatabase();
     startCleanupInterval();
