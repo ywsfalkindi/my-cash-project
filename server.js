@@ -6,11 +6,17 @@ const session = require('express-session');
 const app = express();
 const port = 3000;
 
+app.set('trust proxy', 1); // <-- أضف هذا السطر قبل إعدادات الجلسة
+
 app.use(session({
-    secret: 'a-very-strong-secret-key-that-no-one-knows', // <-- كلمة سر لتشفير الجلسات
+    secret: 'a-very-strong-secret-key-that-no-one-knows',
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: true } // في حالة النشر الحقيقي على استضافة HTTPS، يجب تغييرها إلى true
+    proxy: true, // <-- هذا هو السطر المهم الذي أضفناه
+    cookie: { 
+        secure: true, // يبقى true
+        sameSite: 'none' // <-- إضافة مهمة للتوافق مع المتصفحات
+    }
 }));
 
 // هذا السطر يسمح للخادم بفهم البيانات القادمة من النماذج
@@ -169,3 +175,4 @@ app.listen(port, () => {
     console.log(`المشروع يعمل الآن على الرابط http://localhost:${port}`);
 
 });
+
