@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ادخل السحب</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>صفحة السحب</h1>
+        <p>سيتم إدخالك في السحب بجميع النقاط التي تملكها حاليًا.</p>
+        
+        <!-- مكان جديد لعرض النقاط -->
+        <div class="points-display">
+            نقاطك الحالية: <span id="currentPoints">...</span>
+        </div>
+
+        <div class="form-group">
+            <label for="usernameInput">يوزر انستغرام:</label>
+            <input type="text" id="usernameInput" placeholder="@username">
+        </div>
+        
+        <!-- تم حذف حقل إدخال النقاط من هنا -->
+        
+        <button id="submitBtn">أرسل مشاركتي</button>
+
+        <div id="message"></div>
+        <br>
+        <a href="/">العودة للصفحة الرئيسية</a>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

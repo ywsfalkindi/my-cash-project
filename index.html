@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اربح معنا</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>مرحبًا بك في موقعنا!</h1>
+        <p>احصل على نقاط وادخل السحب على جوائز قيمة. كل ما عليك هو اتباع الخطوات التالية:</p>
+        
+        <div class="links-section">
+            <h2>1. اختر رابطًا واحصل على كود</h2>
+            <p>اضغط على أحد الروابط، تخطى الإعلانات، وانسخ الكود الذي سيظهر لك.</p>
+            <!-- هنا تضع روابطك المختصرة -->
+            <a href="رابطك-المختصر-هنا-1" target="_blank" class="link-btn">الرابط الأول</a>
+            <a href="رابطك-المختصر-هنا-2" target="_blank" class="link-btn">الرابط الثاني</a>
+            <a href="رابطك-المختصر-هنا-3" target="_blank" class="link-btn">الرابط الثالث</a>
+        </div>
+
+        <div class="code-section">
+            <h2>2. أدخل الكود لتربح نقطة</h2>
+            <input type="text" id="codeInput" placeholder="الصق الكود هنا...">
+            <button id="verifyBtn">تحقق من الكود</button>
+        </div>
+
+        <div class="points-section">
+            <h2>نقاطك الحالية: <span id="points">0</span></h2>
+        </div>
+
+        <div class="giveaway-section">
+            <h2>3. ادخل السحب بنقاطك</h2>
+            <p>عندما تجمع النقاط التي تريدها، اضغط هنا للدخول في السحب.</p>
+            <a href="/giveaway" class="main-btn">الذهاب لصفحة السحب</a>
+        </div>
+
+        <div id="message"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
