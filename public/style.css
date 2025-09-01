@@ -1,0 +1,101 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
+
+body {
+    font-family: 'Cairo', sans-serif;
+    background-color: #f0f2f5;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.container {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 600px;
+    text-align: center;
+}
+
+h1, h2 {
+    color: #2c3e50;
+}
+
+p {
+    color: #7f8c8d;
+    line-height: 1.6;
+}
+
+div[class$="-section"] {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #ecf0f1;
+}
+
+input[type="text"], input[type="number"] {
+    width: 80%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #bdc3c7;
+    font-size: 1em;
+    margin-top: 10px;
+}
+
+button, .link-btn, .main-btn {
+    display: inline-block;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+    margin: 10px 5px;
+    transition: background-color 0.3s ease;
+}
+
+#verifyBtn, #submitBtn {
+    background-color: #27ae60;
+    color: white;
+}
+#verifyBtn:hover, #submitBtn:hover {
+    background-color: #229954;
+}
+
+.link-btn {
+    background-color: #3498db;
+    color: white;
+}
+.link-btn:hover {
+    background-color: #2980b9;
+}
+
+.main-btn {
+    background-color: #e67e22;
+    color: white;
+}
+.main-btn:hover {
+    background-color: #d35400;
+}
+
+#message {
+    margin-top: 20px;
+    padding: 10px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+.success {
+    color: #27ae60;
+    background-color: #eafaf1;
+}
+.error {
+    color: #c0392b;
+    background-color: #fbeeee; /* <-- هنا كان الخطأ الأول، تم التصحيح */
+}
+
+/* تم حذف قوس الإغلاق الإضافي الذي كان هنا */
