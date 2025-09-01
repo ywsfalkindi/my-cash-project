@@ -10,7 +10,7 @@ app.use(session({
     secret: 'a-very-strong-secret-key-that-no-one-knows', // <-- كلمة سر لتشفير الجلسات
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false } // في حالة النشر الحقيقي على استضافة HTTPS، يجب تغييرها إلى true
+    cookie: { secure: true } // في حالة النشر الحقيقي على استضافة HTTPS، يجب تغييرها إلى true
 }));
 
 // هذا السطر يسمح للخادم بفهم البيانات القادمة من النماذج
@@ -167,4 +167,5 @@ app.get('/giveaway', (req, res) => {
 // تشغيل الخادم
 app.listen(port, () => {
     console.log(`المشروع يعمل الآن على الرابط http://localhost:${port}`);
+
 });
